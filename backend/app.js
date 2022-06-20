@@ -2,6 +2,7 @@ require("dotenv").config();
 require("./config/database").connect();
 const express = require("express");
 const User = require("./model/user");
+const Produits = require('./model/produit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require("./middleware/auth");
@@ -103,5 +104,65 @@ app.get("/welcome", auth, (req, res) => {
     res.status(200).send("Welcome 🙌 ");
 });
 
+
+app.get('/produits', async  (req, res) => {
+    const produits = await Produits.find() // Tous les produits 
+    await res.json(produits)
+})
+
+
+app.get(`/products`, async (req, res) => {    //products/?categorie=boisson, froid...   Les categories
+    const cate = req.query.categorie
+    const produits = await Produits.find({
+        categorie : cate
+    }) //
+    await res.json(produits)
+})
+
+app.get('/produits/:id', async (req, res) => { // Produits par ID
+    const id = req.params.id
+    const produits = await Produits.findOne({_id : id}) 
+    await res.json(produits)
+})
+
+app.post('/produits', auth, async (req, res) => { //Ajouter un produit
+    const titre = req.body.titre;
+    const description = req.body.description;
+    const prix = req.body.prix;
+    const image = req.body.image;
+    const categorie = req.body.categorie;
+
+    const nouveau_produit = new app.post('/produits', async (req, res) => { //Ajouter un produit
+    const titre = req.body.titre;
+    const description = req.body.description;
+    const prix = req.body.prix;
+    const image = req.body.image;
+    const categorie = req.body.categorie;
+
+    const nouveau_produit = new Produits({ 
+        titre: titre,
+        description: description,
+        prix: prix,
+        image: image,
+        categorie: categorie
+    })
+
+    await nouveau_produit.save() 
+    res.json(nouveau_produit)
+    return
+
+})({ 
+        titre: titre,
+        description: description,
+        prix: prix,
+        image: image,
+        categorie: categorie
+    })
+
+    await nouveau_produit.save() 
+    res.json(nouveau_produit)
+    return
+
+})
 
 module.exports = app;
