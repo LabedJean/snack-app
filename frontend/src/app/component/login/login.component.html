@@ -1,0 +1,30 @@
+<p>login works!</p>
+
+<div ngForm>
+    <!-- New User Form -->
+    <form #NewUserData="ngForm"  (ngSubmit)="saveUser(NewUserData.value)">
+    <label for="">Prenom</label>
+    <input type="text" name="firstname" ngModel>
+    <label for="">Nom</label>
+    <input type="text" name="lastname" ngModel>
+    <label for="">Email</label>
+    <input type="text" name="email" ngModel>
+    <label for="">Mot de passe</label>
+    <input type="text" name="password" ngModel>
+
+    <button type="submit" class="btn btn-primary">Inscription</button>
+    </form>
+
+    <!-- Log In Form -->
+    <form #userData="ngForm"  (ngSubmit)="loginUser(userData.value)">
+        <label for="">Email</label>
+        <input type="text" name="email" ngModel>
+        <label for="">Mot de passe</label>
+        <input type="text" name="password" ngModel>
+
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+        </form>
+
+        <button (click)="destroy()" type="button">Se déconnecter </button>
+    
+</div>

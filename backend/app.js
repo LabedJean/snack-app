@@ -6,24 +6,26 @@ const Produits = require('./model/produit');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require("./middleware/auth");
+const cors = require('cors');
 
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Logic goes here
 
-
+app.use(cors())
 
 // Register
 app.post("/register", async (req, res) => {
     // our register logic goes here...
     try {
         // Get user input
-        const { first_name, last_name, email, password } = req.body;
+        const { firstname, lastname, email, password } = req.body;
 
         // Validate user input
-        if (!(email && password && first_name && last_name)) {
+        if (!(email && password && firstname && lastname)) {
             res.status(400).send("Tous les champs sont requis");
         }
 
@@ -40,8 +42,8 @@ app.post("/register", async (req, res) => {
 
         // Create user in our database
         const user = await User.create({
-            first_name,
-            last_name,
+            firstname,
+            lastname,
             email: email.toLowerCase(), // sanitize: convert email to lowercase
             password: encryptedPassword,
         });
