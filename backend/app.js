@@ -106,14 +106,14 @@ app.get("/welcome", auth, (req, res) => {
     res.status(200).send("Welcome 🙌 ");
 });
 
-
+// Tous les produits
 app.get('/produits', async  (req, res) => {
-    const produits = await Produits.find() // Tous les produits 
+    const produits = await Produits.find()  
     await res.json(produits)
 })
 
-
-app.get(`/products`, async (req, res) => {    //products/?categorie=boisson, froid...   Les categories
+// Catégorie products/?categorie=boisson, froid...   Les categories
+app.get(`/products`, async (req, res) => {   
     const cate = req.query.categorie
     const produits = await Produits.find({
         categorie : cate
@@ -121,50 +121,90 @@ app.get(`/products`, async (req, res) => {    //products/?categorie=boisson, fro
     await res.json(produits)
 })
 
-app.get('/produits/:id', async (req, res) => { // Produits par ID
+//Produits par ID
+app.get('/produits/:id', async (req, res) => { 
     const id = req.params.id
     const produits = await Produits.findOne({_id : id}) 
     await res.json(produits)
 })
 
-app.post('/produits', auth, async (req, res) => { //Ajouter un produit
-    const titre = req.body.titre;
-    const description = req.body.description;
-    const prix = req.body.prix;
-    const image = req.body.image;
-    const categorie = req.body.categorie;
+// filtre par prix entre min et max
+app.get('/byprice', async (req, res) => { 
+    const max = req.query.max;
+    const min = req.query.min;
+    const produits = await Produits.find(
+        { "prix": {$gt : min, $lt : max}}
+    ) 
+    await res.json(produits)
+})
 
-    const nouveau_produit = new app.post('/produits', async (req, res) => { //Ajouter un produit
-    const titre = req.body.titre;
-    const description = req.body.description;
-    const prix = req.body.prix;
-    const image = req.body.image;
-    const categorie = req.body.categorie;
+//Ajouter un produit -- enlever auth pour les tests
+app.post('/produits', auth, async (req, res) => { 
+    try {
+        
+        const { titre, description, prix, image, categorie } = req.body
+        
+        if (!(titre && description && prix && image && categorie)) {
+            res.status(400).send("Tous les champs sont requis")
+        }
+        const nouveau_produit = new Produits({
+            titre: titre,
+            description: description,
+            prix: prix,
+            image: image,
+            categorie: categorie
+        })
+        await nouveau_produit.save()
+        res.status(200).json(nouveau_produit);
 
-    const nouveau_produit = new Produits({ 
-        titre: titre,
-        description: description,
-        prix: prix,
-        image: image,
-        categorie: categorie
-    })
+    } catch (err) {
+        console.log(err)
+    }
+})
 
-    await nouveau_produit.save() 
-    res.json(nouveau_produit)
-    return
+// Modifier un produit --enlever auth pour les tests
+app.patch('/produits/:id', auth,  async (req, res) => { 
+    try {
+        const id = req.params.id
+        const produits = await Produits.findOne({ _id: id })
+        const { titre, description, prix, image, categorie } = req.body
 
-})({ 
-        titre: titre,
-        description: description,
-        prix: prix,
-        image: image,
-        categorie: categorie
-    })
+        if (titre) {
+            produits.titre = titre
+        }
+        if (description) {
+            produits.description = description
+        }
+        if (prix) {
+            produits.prix = prix
+        }
+        if (image) {
+            produits.image = image
+        }
+        if (categorie) {
+            produits.categorie = categorie
+        }
 
-    await nouveau_produit.save() 
-    res.json(nouveau_produit)
-    return
+        await produits.save()
 
+        res.status(200).json(produits)
+        
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+
+// Effacer un produit
+app.delete('/produits/:id', auth, async (req, res) => { 
+    try{
+        const id = req.params.id
+        const suppr = await Produits.deleteOne({ _id: id })
+
+        res.status(200).json(suppr)
+    } catch (err){
+        console.log(err)
+    }
 })
 
 module.exports = app;
